@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>@ViewData["Title"] - FX Ledger</title>
+    <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/images/favicon.png" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/mobile.css" asp-append-version="true" />
+</head>
+<body class="mobile-body">
+    <header class="mobile-header d-flex align-items-center justify-content-between px-3">
+        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none">&larr;</a>
+        <div class="text-white fw-semibold">@ViewData["Title"]</div>
+        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none small">Home</a>
+    </header>
+
+    <main class="mobile-content px-3 py-3">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

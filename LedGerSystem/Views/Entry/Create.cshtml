@@ -1,0 +1,132 @@
+@model TransactionEntryPageModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "New Entry";
+    Layout = "_LayoutMobile";
+    string ToJson(IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> items) =>
+        JsonSerializer.Serialize(items.Where(x => !string.IsNullOrEmpty(x.Value)).Select(x => new { value = x.Value, text = x.Text }));
+}
+
+@if (TempData["SuccessMessage"] is string msg)
+{
+    <div class="alert alert-success py-2">@msg</div>
+}
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+<form asp-action="Create" method="post" id="entryForm">
+    @Html.AntiForgeryToken()
+    <script type="application/json" id="typeRules">@Html.Raw(Model.TypeRulesJson)</script>
+    <script type="application/json" id="customersJson">@Html.Raw(ToJson(Model.Customers))</script>
+    <script type="application/json" id="suppliersJson">@Html.Raw(ToJson(Model.Suppliers))</script>
+    <script type="application/json" id="shufenJson">@Html.Raw(ToJson(Model.ShufenParties))</script>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Entry.TransTypeId" class="form-label fw-semibold"></label>
+                <select asp-for="Entry.TransTypeId" asp-items="Model.TransactionTypes" class="form-select form-select-lg" id="transType"></select>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Entry.TransDate" class="form-label"></label>
+                <input asp-for="Entry.TransDate" class="form-control form-control-lg" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+            </div>
+
+            <div class="mb-3 field-party">
+                <label asp-for="Entry.PartyId" class="form-label" id="partyLabel">Customer / Party</label>
+                <select asp-for="Entry.PartyId" class="form-select form-select-lg" id="partySelect">
+                    @foreach (var item in Model.Customers)
+                    {
+                        <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3 field-supplier d-none">
+                <label asp-for="Entry.RelatedPartyId" class="form-label">Supplier (Triangular Payment)</label>
+                <select asp-for="Entry.RelatedPartyId" asp-items="Model.Suppliers" class="form-select form-select-lg">
+                    <option value="">-- Select Supplier --</option>
+                </select>
+            </div>
+
+            <div class="mb-3 field-quantity d-none">
+                <label asp-for="Entry.Quantity" class="form-label" id="quantityLabel">USDT Quantity</label>
+                <input asp-for="Entry.Quantity" class="form-control form-control-lg" inputmode="decimal" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Entry.Amount" class="form-label fw-semibold" id="amountLabel">Amount</label>
+                <div class="input-group input-group-lg">
+                    <input asp-for="Entry.Amount" class="form-control" inputmode="decimal" id="amount" />
+                    <select asp-for="Entry.Currency" class="form-select" style="max-width:100px;" id="currency">
+                        <option value="BDT">BDT</option>
+                        <option value="CNY">CNY</option>
+                        <option value="USDT">USDT</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 field-rate">
+                <label asp-for="Entry.UnitPrice" class="form-label" id="rateLabel">Rate / Unit Price</label>
+                <input asp-for="Entry.UnitPrice" class="form-control form-control-lg" inputmode="decimal" id="unitPrice" />
+            </div>
+
+            <div class="mb-3 field-equiv d-none">
+                <label asp-for="Entry.EquivalentAmount" class="form-label" id="equivLabel">Equivalent Amount</label>
+                <input asp-for="Entry.EquivalentAmount" class="form-control form-control-lg" inputmode="decimal" id="equivalentAmount" />
+            </div>
+
+            <div class="mb-3 field-paymethod d-none">
+                <label asp-for="Entry.PayMethod" class="form-label">Pay Method</label>
+                <select asp-for="Entry.PayMethod" class="form-select form-select-lg">
+                    <option value="">-- Select --</option>
+                    <option value="1">Cash</option>
+                    <option value="2">Bank</option>
+                </select>
+            </div>
+
+            <div class="mb-3 field-bank d-none">
+                <label asp-for="Entry.BankAccountId" class="form-label">Bank Account</label>
+                <select asp-for="Entry.BankAccountId" asp-items="Model.BankAccounts" class="form-select form-select-lg">
+                    <option value="">-- Select Bank --</option>
+                </select>
+            </div>
+
+            <div class="mb-3 field-payout d-none">
+                <label asp-for="Entry.PayoutChannel" class="form-label">Payout Channel</label>
+                <select asp-for="Entry.PayoutChannel" class="form-select form-select-lg">
+                    <option value="">-- Select --</option>
+                    <option value="1">Alipay</option>
+                    <option value="2">WeChat</option>
+                    <option value="3">Bank</option>
+                </select>
+            </div>
+
+            <div class="field-payout-account d-none">
+                <div class="mb-3">
+                    <label asp-for="Entry.PayoutAccountName" class="form-label">Account Name (optional)</label>
+                    <input asp-for="Entry.PayoutAccountName" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Entry.PayoutAccountNo" class="form-label">Account No. (optional)</label>
+                    <input asp-for="Entry.PayoutAccountNo" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Entry.Remark" class="form-label"></label>
+                <textarea asp-for="Entry.Remark" class="form-control" rows="2" placeholder="Optional notes"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-actions">
+        <button type="submit" name="Entry.SaveAndAddAnother" value="false" class="btn btn-success btn-lg w-100 mb-2">Confirm and Save</button>
+        <button type="submit" name="Entry.SaveAndAddAnother" value="true" class="btn btn-outline-success btn-lg w-100">Save and Add Another</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/entry-form.js" asp-append-version="true"></script>
+}

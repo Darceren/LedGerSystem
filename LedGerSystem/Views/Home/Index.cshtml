@@ -1,0 +1,105 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Cash on Hand</div>
+                <div class="h4 mb-0 text-success">@Model.CashOnHand.ToString("N2")</div>
+                <div class="small text-muted">BDT</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Customer Receivable</div>
+                <div class="h4 mb-0">@Model.TotalCustomerReceivable.ToString("N2")</div>
+                <div class="small text-muted">BDT</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Supplier Payable</div>
+                <div class="h4 mb-0 text-danger">@Model.TotalSupplierPayable.ToString("N2")</div>
+                <div class="small text-muted">BDT</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Quick Action</div>
+                <a asp-controller="Entry" asp-action="Create" class="btn btn-success btn-sm mt-2">New Entry</a>
+                <a asp-controller="Report" asp-action="FinalAccount" class="btn btn-outline-primary btn-sm mt-2">Final Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Party Balances</div>
+            <ul class="list-group list-group-flush">
+                @if (!Model.TopPartyBalances.Any())
+                {
+                    <li class="list-group-item text-muted text-center py-3">No balances yet</li>
+                }
+                else
+                {
+                    foreach (var item in Model.TopPartyBalances)
+                    {
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>@item.Code</strong> <span class="text-muted small">@item.Category</span></span>
+                            <span class="@(item.Balance >= 0 ? "text-success" : "text-danger")">@item.Balance.ToString("N2")</span>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">Recent Transactions</span>
+                <a asp-controller="Entry" asp-action="Create" class="btn btn-sm btn-outline-primary">Add</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Party</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.RecentTransactions.Any())
+                        {
+                            <tr><td colspan="4" class="text-center text-muted py-4">No transactions yet.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.RecentTransactions)
+                            {
+                                <tr>
+                                    <td class="small">@item.TransDate.ToString("MM-dd HH:mm")</td>
+                                    <td class="small">@(item.TransType?.NameEn ?? "-")</td>
+                                    <td>@(item.Party?.Code ?? "-")</td>
+                                    <td class="text-end fw-semibold">@item.Amount.ToString("N2") @item.Currency</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

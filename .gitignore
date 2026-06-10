@@ -1,0 +1,14 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+
+# User-specific
+*.user
+*.suo
+.vs/
+
+# Secrets
+appsettings.Development.json
+appsettings.*.local.json
