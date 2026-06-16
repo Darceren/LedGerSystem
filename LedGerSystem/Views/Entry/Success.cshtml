@@ -4,10 +4,21 @@
     Layout = "_LayoutMobile";
 }
 
+@{
+    var saved = ViewBag.SavedTransaction as LedGerSystem.Entities.LedgerTransaction;
+}
 <div class="text-center mb-4">
     <div class="display-6 text-success mb-2">&#10003;</div>
     <h1 class="h4 fw-bold">Transaction Saved</h1>
-    <p class="text-muted mb-0">Your entry has been recorded.</p>
+    @if (saved != null)
+    {
+        <p class="mb-1"><strong>@saved.TransNo</strong></p>
+        <p class="text-muted small mb-0">@(saved.TransType?.NameEn) · @saved.Amount.ToString("N2") @saved.Currency</p>
+    }
+    else
+    {
+        <p class="text-muted mb-0">Your entry has been recorded.</p>
+    }
 </div>
 
 <div class="d-grid gap-2 mb-4">

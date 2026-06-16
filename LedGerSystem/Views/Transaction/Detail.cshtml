@@ -1,0 +1,51 @@
+@model TransactionDetailViewModel
+@{
+    ViewData["Title"] = "Transaction Detail";
+    var tx = Model.Transaction;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">@tx.TransNo</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to List</a>
+        @if (Model.CanReverse)
+        {
+            <a asp-action="Reverse" asp-route-id="@tx.Id" class="btn btn-sm btn-outline-danger">Reverse</a>
+        }
+    </div>
+</div>
+
+@if (tx.IsDeleted)
+{
+    <div class="alert alert-warning">This transaction has been reversed / voided.</div>
+}
+@if (Model.ReversalId.HasValue)
+{
+    <div class="alert alert-info">Reversal record: <a asp-action="Detail" asp-route-id="@Model.ReversalId">View reversal</a></div>
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Type</dt><dd class="col-sm-9">@(tx.TransType?.NameEn ?? "-")</dd>
+            <dt class="col-sm-3">Date</dt><dd class="col-sm-9">@tx.TransDate.ToString("yyyy-MM-dd HH:mm")</dd>
+            <dt class="col-sm-3">Party</dt><dd class="col-sm-9">@(tx.Party != null ? $"{tx.Party.Code} - {tx.Party.Name}" : "-")</dd>
+            <dt class="col-sm-3">Related Party</dt><dd class="col-sm-9">@(tx.RelatedParty != null ? $"{tx.RelatedParty.Code} - {tx.RelatedParty.Name}" : "-")</dd>
+            <dt class="col-sm-3">Bank</dt><dd class="col-sm-9">@(tx.BankAccount != null ? $"{tx.BankAccount.Code} - {tx.BankAccount.Name}" : "-")</dd>
+            <dt class="col-sm-3">Amount</dt><dd class="col-sm-9 fw-semibold">@tx.Amount.ToString("N4") @tx.Currency</dd>
+            @if (tx.Quantity.HasValue)
+            {
+                <dt class="col-sm-3">Quantity</dt><dd class="col-sm-9">@tx.Quantity @tx.QuantityCurrency</dd>
+            }
+            @if (tx.UnitPrice.HasValue)
+            {
+                <dt class="col-sm-3">Rate / Price</dt><dd class="col-sm-9">@tx.UnitPrice</dd>
+            }
+            @if (tx.EquivalentAmount.HasValue)
+            {
+                <dt class="col-sm-3">Equivalent</dt><dd class="col-sm-9">@tx.EquivalentAmount @tx.EquivalentCurrency</dd>
+            }
+            <dt class="col-sm-3">Remark</dt><dd class="col-sm-9">@(tx.Remark ?? "-")</dd>
+        </dl>
+    </div>
+</div>

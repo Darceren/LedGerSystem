@@ -8,7 +8,17 @@ public class DashboardViewModel
 
     public decimal TotalSupplierPayable { get; set; }
 
-    public List<BalanceLineItem> TopPartyBalances { get; set; } = [];
+    public decimal TodayBdtCollected { get; set; }
+
+    public int TodayTransactionCount { get; set; }
+
+    public bool HasBankAccounts { get; set; }
+
+    public bool HasOpeningBalances { get; set; }
+
+    public List<BalanceLineItem> PartyBalances { get; set; } = [];
+
+    public List<BalanceLineItem> BankBalances { get; set; } = [];
 
     public List<Entities.LedgerTransaction> RecentTransactions { get; set; } = [];
 }

@@ -62,14 +62,17 @@ public class EntryController(
     [HttpGet]
     public async Task<IActionResult> Success(long id)
     {
+        var saved = await transactionService.GetByIdAsync(id);
         var recent = await transactionService.GetRecentAsync(10);
-        ViewBag.TransactionId = id;
+        ViewBag.SavedTransaction = saved;
         return View(recent);
     }
 
     private async Task<TransactionEntryPageModel> BuildViewModelAsync(TransactionEntryViewModel model)
     {
         var lookups = await lookupService.GetEntryLookupsAsync();
+
+        ViewBag.HasBanks = lookups.BankAccounts.Count > 0;
 
         return new TransactionEntryPageModel
         {

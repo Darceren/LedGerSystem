@@ -6,6 +6,8 @@
 01_LedGerDB_Schema.sql
 02_LedGerDB_SeedData.sql
 04_LedGerDB_ColumnDescriptions.sql   ← 字段说明（必跑）
+05_DevTest_OpeningBalances.sql       ← 开发测试期初（可选）
+99_GoLive_ResetTransactional.sql     ← 上线前清空流水+期初
 03_AccountingRules.md                  ← 记账规则文档（不用执行）
 ```
 

@@ -11,6 +11,9 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPartyService, PartyService>();
 builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
+builder.Services.AddScoped<IOpeningBalanceService, OpeningBalanceService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IExcelExportService, ExcelExportService>();
 
 builder.Services
     .AddAuthentication(AppConstants.AuthScheme)

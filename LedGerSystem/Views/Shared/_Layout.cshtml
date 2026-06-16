@@ -1,4 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@using System.Globalization
+@{
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string NavActive(string c, string? a = null) =>
+        ctrl.Equals(c, StringComparison.OrdinalIgnoreCase) && (a == null || action.Equals(a, StringComparison.OrdinalIgnoreCase))
+            ? "active" : "";
+    var isReport = ctrl.Equals("Report", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,48 +16,97 @@
     <link rel="icon" type="image/png" href="~/images/favicon.png" asp-append-version="true" />
     <link rel="apple-touch-icon" href="~/images/favicon.png" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/flatpickr/flatpickr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-primary shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">FX Ledger</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Entry" asp-action="Create">New Entry</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Party" asp-action="Index">Parties</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="BankAccount" asp-action="Index">Banks</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Report" asp-action="FinalAccount">Final Account</a></li>
-                    </ul>
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <span class="navbar-text text-white-50 me-3 d-none d-sm-inline">@User.Identity.Name</span>
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                        </form>
-                    }
-                </div>
+<body class="app-body">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="app-shell">
+        <aside class="app-sidebar" id="appSidebar">
+            <a class="app-brand" asp-controller="Home" asp-action="Index">
+                <img src="~/images/favicon.png" alt="" />
+                FX Ledger
+            </a>
+            <ul class="app-nav">
+                <li><a class="@NavActive("Home")" asp-controller="Home" asp-action="Index">
+                    <partial name="_NavIcon" model='"dashboard"' /> Dashboard
+                </a></li>
+                <li><a class="@NavActive("Entry", "Create")" asp-controller="Entry" asp-action="Create">
+                    <partial name="_NavIcon" model='"entry"' /> New Entry
+                </a></li>
+                <li><a class="@NavActive("Transaction")" asp-controller="Transaction" asp-action="Index">
+                    <partial name="_NavIcon" model='"transactions"' /> Transactions
+                </a></li>
+                <li><a class="@NavActive("Party")" asp-controller="Party" asp-action="Index">
+                    <partial name="_NavIcon" model='"parties"' /> Parties
+                </a></li>
+                <li><a class="@NavActive("BankAccount")" asp-controller="BankAccount" asp-action="Index">
+                    <partial name="_NavIcon" model='"banks"' /> Banks
+                </a></li>
+                <li><a class="@NavActive("OpeningBalance")" asp-controller="OpeningBalance" asp-action="Index">
+                    <partial name="_NavIcon" model='"opening"' /> Opening
+                </a></li>
+                <li class="nav-section">Reports</li>
+                <li class="nav-sub"><a class="@(isReport && action == "FinalAccount" ? "active" : "")" asp-controller="Report" asp-action="FinalAccount">
+                    Final Account
+                </a></li>
+                <li class="nav-sub"><a class="@(isReport && action == "DailyRmbPayout" ? "active" : "")" asp-controller="Report" asp-action="DailyRmbPayout">
+                    Daily RMB
+                </a></li>
+                <li class="nav-sub"><a class="@(isReport && action == "DailyBdtCollection" ? "active" : "")" asp-controller="Report" asp-action="DailyBdtCollection">
+                    Daily BDT
+                </a></li>
+                <li class="nav-sub"><a class="@(isReport && action == "ProfitAnalysis" ? "active" : "")" asp-controller="Report" asp-action="ProfitAnalysis">
+                    Profit Analysis
+                </a></li>
+            </ul>
+            <div class="app-sidebar-footer">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="mb-2">@User.Identity.Name</div>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Logout</button>
+                    </form>
+                }
             </div>
-        </nav>
-    </header>
+        </aside>
 
-    <main class="container py-3 pb-5">
-        @if (TempData["SuccessMessage"] is string successMsg)
-        {
-            <div class="alert alert-success py-2">@successMsg</div>
-        }
-        @RenderBody()
-    </main>
+        <div class="app-main">
+            <div class="app-content">
+                <div class="d-flex align-items-center gap-2 mb-2 d-lg-none">
+                    <button type="button" class="btn btn-sm btn-outline-secondary sidebar-toggle" id="sidebarToggle" aria-label="Menu">☰</button>
+                </div>
+                @if (TempData["SuccessMessage"] is string successMsg)
+                {
+                    <div class="alert alert-success py-2">@successMsg</div>
+                }
+                @if (TempData["ErrorMessage"] is string errorMsg)
+                {
+                    <div class="alert alert-danger py-2">@errorMsg</div>
+                }
+                @RenderBody()
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/flatpickr/flatpickr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var sidebar = document.getElementById('appSidebar');
+            var backdrop = document.getElementById('sidebarBackdrop');
+            var toggle = document.getElementById('sidebarToggle');
+            function close() { sidebar?.classList.remove('show'); backdrop?.classList.remove('show'); }
+            toggle?.addEventListener('click', function () {
+                sidebar?.classList.toggle('show');
+                backdrop?.classList.toggle('show');
+            });
+            backdrop?.addEventListener('click', close);
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

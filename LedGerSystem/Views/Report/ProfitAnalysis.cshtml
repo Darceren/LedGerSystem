@@ -1,0 +1,61 @@
+@model ProfitAnalysisViewModel
+@{
+    ViewData["Title"] = "Profit Analysis";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">Profit Analysis</h1>
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+        <input type="date" name="from" value="@Model.DateFrom.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+        <span class="small text-muted">to</span>
+        <input type="date" name="to" value="@Model.DateTo.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+        <button type="submit" class="btn btn-sm btn-primary">View</button>
+        <a asp-action="ProfitAnalysis" asp-route-from="@Model.DateFrom.ToString("yyyy-MM-dd")" asp-route-to="@Model.DateTo.ToString("yyyy-MM-dd")" asp-route-export="excel" class="btn btn-sm btn-outline-success">Excel</a>
+    </form>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body py-3">
+        <div class="small text-muted">Avg USDT Cost</div><div class="h6 mb-0">@Model.AvgUsdtCostBdt.ToString("N4") BDT</div>
+    </div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body py-3">
+        <div class="small text-muted">Avg RMB Cost</div><div class="h6 mb-0">@Model.AvgRmbCostBdt.ToString("N4") BDT/RMB</div>
+    </div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm"><div class="card-body py-3">
+        <div class="small text-muted">RMB Sold</div><div class="h6 mb-0">@Model.TotalRmbSold.ToString("N2") CNY</div>
+    </div></div></div>
+    <div class="col-md-3 col-6"><div class="card border-0 shadow-sm bg-primary text-white"><div class="card-body py-3">
+        <div class="small opacity-75">Est. Gross Profit</div><div class="h6 mb-0">@Model.EstimatedGrossProfitBdt.ToString("N2") BDT</div>
+    </div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold">Sell RMB Detail</div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead class="table-light">
+                <tr><th>Date</th><th>Customer</th><th class="text-end">RMB</th><th class="text-end">Sell Rate</th><th class="text-end">BDT Recv</th><th class="text-end">Est. Profit</th></tr>
+            </thead>
+            <tbody>
+                @if (!Model.SellLines.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">No sell transactions in period.</td></tr>
+                }
+                else
+                {
+                    foreach (var line in Model.SellLines)
+                    {
+                        <tr>
+                            <td class="small">@line.TransDate.ToString("MM-dd HH:mm")</td>
+                            <td>@line.PartyCode</td>
+                            <td class="text-end">@line.RmbAmount.ToString("N2")</td>
+                            <td class="text-end">@line.SellRate.ToString("N4")</td>
+                            <td class="text-end">@line.BdtReceivable.ToString("N2")</td>
+                            <td class="text-end @(line.EstGrossProfitBdt >= 0 ? "text-success" : "text-danger")">@line.EstGrossProfitBdt.ToString("N2")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

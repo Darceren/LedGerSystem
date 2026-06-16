@@ -1,0 +1,132 @@
+@model OpeningBalancePageModel
+@{
+    ViewData["Title"] = "Opening Balances";
+    var parties = ViewBag.Parties as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+    var banks = ViewBag.Banks as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <div>
+        <h1 class="h4 mb-0">Opening Balances</h1>
+        <p class="text-muted small mb-0">Positive = receivable/asset; negative = payable/liability</p>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">@(Model.Form.Id.HasValue ? "Edit" : "Add") Opening Balance</div>
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+                <form asp-action="Save" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Form.Id" />
+                    <div class="mb-3">
+                        <label asp-for="Form.BalanceDate" class="form-label"></label>
+                        <input asp-for="Form.BalanceDate" type="date" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Form.EntityType" class="form-label"></label>
+                        <select asp-for="Form.EntityType" class="form-select" id="entityType">
+                            <option value="1">Party</option>
+                            <option value="2">Bank Account</option>
+                            <option value="3">Cash on Hand</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 entity-party">
+                        <label asp-for="Form.PartyId" class="form-label"></label>
+                        <select asp-for="Form.PartyId" asp-items="parties" class="form-select"></select>
+                    </div>
+                    <div class="mb-3 entity-bank d-none">
+                        <label asp-for="Form.BankAccountId" class="form-label"></label>
+                        <select asp-for="Form.BankAccountId" asp-items="banks" class="form-select"></select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-8">
+                            <label asp-for="Form.Amount" class="form-label"></label>
+                            <input asp-for="Form.Amount" class="form-control" inputmode="decimal" />
+                        </div>
+                        <div class="col-4">
+                            <label asp-for="Form.Currency" class="form-label"></label>
+                            <select asp-for="Form.Currency" class="form-select">
+                                <option value="BDT">BDT</option>
+                                <option value="CNY">CNY</option>
+                                <option value="USDT">USDT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Form.Remark" class="form-label"></label>
+                        <input asp-for="Form.Remark" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Opening Balance</button>
+                    @if (Model.Form.Id.HasValue)
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancel Edit</a>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">Current Opening Balances</div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Entity</th>
+                            <th class="text-end">Amount</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Items.Any())
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4">No opening balances yet.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="small">@item.BalanceDate.ToString("yyyy-MM-dd")</td>
+                                    <td class="small">@item.EntityTypeName</td>
+                                    <td><strong>@item.EntityCode</strong> <span class="text-muted small">@item.EntityName</span></td>
+                                    <td class="text-end @(item.Amount >= 0 ? "text-success" : "text-danger")">@item.Amount.ToString("N2") @item.Currency</td>
+                                    <td class="text-end text-nowrap">
+                                        <a asp-action="Index" asp-route-editId="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this opening balance?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Del</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    const type = document.getElementById('entityType');
+    const party = document.querySelector('.entity-party');
+    const bank = document.querySelector('.entity-bank');
+    function sync() {
+        const v = type.value;
+        party.classList.toggle('d-none', v !== '1');
+        bank.classList.toggle('d-none', v !== '2');
+    }
+    type.addEventListener('change', sync);
+    sync();
+})();
+</script>
+}

@@ -1,0 +1,100 @@
+@model TransactionListViewModel
+@{
+    ViewData["Title"] = "Transactions";
+    var types = ViewBag.TransactionTypes as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+    var parties = ViewBag.Parties as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? [];
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">Transactions</h1>
+    <a asp-action="Export" asp-all-route-data="@(new Dictionary<string, string?> {
+        ["DateFrom"] = Model.Query.DateFrom?.ToString("yyyy-MM-dd"),
+        ["DateTo"] = Model.Query.DateTo?.ToString("yyyy-MM-dd"),
+        ["TransTypeId"] = Model.Query.TransTypeId?.ToString(),
+        ["PartyId"] = Model.Query.PartyId?.ToString(),
+        ["TransNo"] = Model.Query.TransNo
+    })" class="btn btn-sm btn-outline-success">Export Excel</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-2 col-6">
+                <label class="form-label small">From</label>
+                <input type="date" name="DateFrom" value="@Model.Query.DateFrom?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2 col-6">
+                <label class="form-label small">To</label>
+                <input type="date" name="DateTo" value="@Model.Query.DateTo?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2 col-6">
+                <label class="form-label small">Type</label>
+                <select name="TransTypeId" asp-items="types" class="form-select form-select-sm"></select>
+            </div>
+            <div class="col-md-3 col-6">
+                <label class="form-label small">Party</label>
+                <select name="PartyId" asp-items="parties" class="form-select form-select-sm"></select>
+            </div>
+            <div class="col-md-2 col-6">
+                <label class="form-label small">Trans No.</label>
+                <input type="text" name="TransNo" value="@Model.Query.TransNo" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-1 col-6">
+                <button type="submit" class="btn btn-primary btn-sm w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Trans No.</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Party</th>
+                    <th class="text-end">Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">No transactions found.</td></tr>
+                }
+                else
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr class="@(item.IsDeleted ? "text-muted" : "")">
+                            <td class="small fw-semibold">@(item.TransNo ?? "-")</td>
+                            <td class="small">@item.TransDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="small">@(item.TransType?.NameEn ?? "-")</td>
+                            <td>@(item.Party?.Code ?? "-")</td>
+                            <td class="text-end">@item.Amount.ToString("N2") @item.Currency</td>
+                            <td><a asp-action="Detail" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Detail</a></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <span class="small text-muted">@Model.TotalCount records — page @Model.Query.Page of @Model.TotalPages</span>
+            <div class="btn-group btn-group-sm">
+                @if (Model.Query.Page > 1)
+                {
+                    <a asp-action="Index" asp-route-Page="@(Model.Query.Page - 1)" asp-route-DateFrom="@Model.Query.DateFrom?.ToString("yyyy-MM-dd")" asp-route-DateTo="@Model.Query.DateTo?.ToString("yyyy-MM-dd")" asp-route-TransTypeId="@Model.Query.TransTypeId" asp-route-PartyId="@Model.Query.PartyId" asp-route-TransNo="@Model.Query.TransNo" class="btn btn-outline-secondary">Prev</a>
+                }
+                @if (Model.Query.Page < Model.TotalPages)
+                {
+                    <a asp-action="Index" asp-route-Page="@(Model.Query.Page + 1)" asp-route-DateFrom="@Model.Query.DateFrom?.ToString("yyyy-MM-dd")" asp-route-DateTo="@Model.Query.DateTo?.ToString("yyyy-MM-dd")" asp-route-TransTypeId="@Model.Query.TransTypeId" asp-route-PartyId="@Model.Query.PartyId" asp-route-TransNo="@Model.Query.TransNo" class="btn btn-outline-secondary">Next</a>
+                }
+            </div>
+        </div>
+    }
+</div>

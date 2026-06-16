@@ -1,0 +1,21 @@
+@model TransactionReverseViewModel
+@{
+    ViewData["Title"] = "Reverse Transaction";
+}
+
+<h1 class="h4 mb-3">Reverse @Model.TransNo</h1>
+<p class="text-muted">Type: <strong>@Model.TypeName</strong>. This will void the original entry and create an audit reversal record.</p>
+
+<form asp-action="Reverse" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="TransNo" />
+    <input type="hidden" asp-for="TypeName" />
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+    <div class="mb-3">
+        <label asp-for="Remark" class="form-label"></label>
+        <textarea asp-for="Remark" class="form-control" rows="3" placeholder="Reason for reversal (required)"></textarea>
+    </div>
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Confirm reversal?');">Confirm Reversal</button>
+    <a asp-action="Detail" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+</form>

@@ -50,6 +50,11 @@ public class BalanceService(ISqlSugarClient db) : IBalanceService
 
         foreach (var tx in transactions)
         {
+            if (tx.IsAdjustment && tx.ReversedTransId.HasValue)
+            {
+                continue;
+            }
+
             if (!typeById.TryGetValue(tx.TransTypeId, out var code))
             {
                 continue;
@@ -266,6 +271,10 @@ public class BalanceService(ISqlSugarClient db) : IBalanceService
 
             case "BUY_USDT":
                 DeductCashOrBank(snapshot, tx);
+                if (tx.PartyId.HasValue)
+                {
+                    AddParty(snapshot, tx.PartyId.Value, tx.Amount);
+                }
                 break;
 
             case "USDT_TO_RMB":

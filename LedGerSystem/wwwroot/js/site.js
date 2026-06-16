@@ -1,4 +1,27 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿(function () {
+    if (typeof flatpickr === 'undefined') return;
 
-// Write your JavaScript code.
+    var dateOpts = {
+        locale: 'default',
+        dateFormat: 'Y-m-d',
+        allowInput: true,
+        disableMobile: true
+    };
+
+    var dateTimeOpts = {
+        locale: 'default',
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        time_24hr: true,
+        allowInput: true,
+        disableMobile: true
+    };
+
+    document.querySelectorAll('input[type="date"], input.date-picker').forEach(function (el) {
+        flatpickr(el, dateOpts);
+    });
+
+    document.querySelectorAll('input[type="datetime-local"], input.datetime-picker').forEach(function (el) {
+        flatpickr(el, dateTimeOpts);
+    });
+})();

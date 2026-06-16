@@ -1,0 +1,57 @@
+@model DailyRmbPayoutViewModel
+@{
+    ViewData["Title"] = "Daily RMB Payout";
+    var dateStr = Model.ReportDate.ToString("yyyy-MM-dd");
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">Daily RMB Payout</h1>
+    <div class="d-flex gap-2">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <input type="date" name="date" value="@dateStr" class="form-control form-control-sm" />
+            <button type="submit" class="btn btn-sm btn-primary">View</button>
+        </form>
+        <a asp-action="DailyRmbPayout" asp-route-date="@dateStr" asp-route-export="excel" class="btn btn-sm btn-outline-success">Excel</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm"><div class="card-body py-3">
+            <div class="small text-muted">Total RMB Sold</div>
+            <div class="h5 mb-0">@Model.TotalRmb.ToString("N2") CNY</div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm"><div class="card-body py-3">
+            <div class="small text-muted">Transactions</div>
+            <div class="h5 mb-0">@Model.TotalCount</div>
+        </div></div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead class="table-light"><tr><th>Customer</th><th>Name</th><th class="text-end">RMB Amount</th><th class="text-end">Tx Count</th></tr></thead>
+            <tbody>
+                @if (!Model.Lines.Any())
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">No RMB sales on this date.</td></tr>
+                }
+                else
+                {
+                    foreach (var line in Model.Lines)
+                    {
+                        <tr>
+                            <td><strong>@line.PartyCode</strong></td>
+                            <td>@line.PartyName</td>
+                            <td class="text-end">@line.Amount.ToString("N2")</td>
+                            <td class="text-end">@line.TxCount</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -5,11 +5,14 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
     <h1 class="h4 mb-0">Final Account</h1>
-    <form method="get" class="d-flex gap-2 align-items-center">
-        <label class="small text-muted mb-0">As of</label>
-        <input type="date" name="date" value="@Model.AsOfDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
-        <button type="submit" class="btn btn-sm btn-primary">View</button>
-    </form>
+    <div class="d-flex gap-2 align-items-center">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <label class="small text-muted mb-0">As of</label>
+            <input type="date" name="date" value="@Model.AsOfDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            <button type="submit" class="btn btn-sm btn-primary">View</button>
+        </form>
+        <a asp-action="FinalAccount" asp-route-date="@Model.AsOfDate.ToString("yyyy-MM-dd")" asp-route-export="excel" class="btn btn-sm btn-outline-success">Excel</a>
+    </div>
 </div>
 
 <div class="row g-3 mb-3">

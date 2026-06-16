@@ -28,7 +28,7 @@ public class LookupService(ISqlSugarClient db) : ILookupService
     public async Task<TransactionEntryLookups> GetEntryLookupsAsync()
     {
         var types = await db.Queryable<SysTransactionType>()
-            .Where(x => x.IsActive)
+            .Where(x => x.IsActive && x.Code != "OPENING_BALANCE" && x.Code != "ADJUSTMENT")
             .OrderBy(x => x.SortOrder)
             .ToListAsync();
 

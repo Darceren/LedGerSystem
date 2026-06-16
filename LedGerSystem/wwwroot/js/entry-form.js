@@ -3,6 +3,7 @@
     if (!typeSelect) return;
 
     const rules = JSON.parse(document.getElementById('typeRules')?.textContent || '{}');
+    const form = document.getElementById('entryForm');
 
     const fields = {
         party: document.querySelector('.field-party'),
@@ -33,9 +34,18 @@
         if (el) el.classList.toggle('d-none', !show);
     }
 
-    function applyRule() {
+    function getRule() {
         const typeId = parseInt(typeSelect.value || '0', 10);
-        const rule = rules[typeId] || rules['4'];
+        return rules[typeId] || null;
+    }
+
+    function applyRule() {
+        const rule = getRule();
+        if (!rule) {
+            ['party', 'supplier', 'bank', 'payMethod', 'payout', 'payoutAccount', 'rate', 'quantity', 'equivalent']
+                .forEach(function (k) { toggle(fields[k], false); });
+            return;
+        }
 
         toggle(fields.party, rule.ShowParty);
         toggle(fields.supplier, rule.ShowSupplier);
@@ -57,9 +67,6 @@
             fields.rateLabel.textContent = rule.Code === 'SELL_RMB' ? 'Rate (BDT/RMB)' :
                 rule.Code === 'USDT_TO_RMB' ? 'Rate (BDT/RMB)' :
                 rule.Code === 'BUY_USDT' ? 'Cost (BDT/USDT)' : 'Rate / Unit Price';
-        }
-        if (fields.quantityLabel) {
-            fields.quantityLabel.textContent = 'USDT Quantity';
         }
         if (fields.equivLabel) {
             fields.equivLabel.textContent = rule.Code === 'SELL_RMB' ? 'Expected BDT' :
@@ -95,6 +102,46 @@
         if (typeId === 3 && amount > 0 && rate > 0) {
             equiv.value = (amount * rate).toFixed(4);
         }
+    }
+
+    function buildSummary() {
+        const rule = getRule();
+        const typeText = typeSelect.options[typeSelect.selectedIndex]?.text || '';
+        const partyText = fields.partySelect?.selectedOptions[0]?.text || '-';
+        const amount = document.getElementById('amount')?.value || '0';
+        const currency = fields.currency?.value || 'BDT';
+        const date = document.querySelector('[name="Entry.TransDate"]')?.value || '';
+        return '<ul class="mb-0">' +
+            '<li><strong>Type:</strong> ' + typeText + '</li>' +
+            '<li><strong>Date:</strong> ' + date + '</li>' +
+            (rule && rule.ShowParty ? '<li><strong>Party:</strong> ' + partyText + '</li>' : '') +
+            '<li><strong>Amount:</strong> ' + amount + ' ' + currency + '</li>' +
+            '</ul>';
+    }
+
+    const btnPreview = document.getElementById('btnPreview');
+    const btnConfirm = document.getElementById('btnConfirmSave');
+    const modalEl = document.getElementById('confirmModal');
+    let modal;
+
+    if (btnPreview && modalEl && form) {
+        modal = new bootstrap.Modal(modalEl);
+        btnPreview.addEventListener('click', function () {
+            if (!getRule()) {
+                alert('Please select a valid transaction type.');
+                return;
+            }
+            document.getElementById('confirmSummary').innerHTML = buildSummary();
+            modal.show();
+        });
+        btnConfirm?.addEventListener('click', function () {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'Entry.SaveAndAddAnother';
+            hidden.value = 'false';
+            form.appendChild(hidden);
+            form.submit();
+        });
     }
 
     typeSelect.addEventListener('change', applyRule);

@@ -11,6 +11,10 @@
 {
     <div class="alert alert-success py-2">@msg</div>
 }
+@if (ViewBag.HasBanks == false)
+{
+    <div class="alert alert-info py-2 small">No bank accounts yet. <a asp-controller="BankAccount" asp-action="Create">Add a bank</a> for bank-related entries.</div>
+}
 
 <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
 
@@ -30,7 +34,7 @@
 
             <div class="mb-3">
                 <label asp-for="Entry.TransDate" class="form-label"></label>
-                <input asp-for="Entry.TransDate" class="form-control form-control-lg" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                <input asp-for="Entry.TransDate" class="form-control form-control-lg datetime-picker" type="text" value="@Model.Entry.TransDate.ToString("yyyy-MM-dd HH:mm")" placeholder="Select date and time" />
             </div>
 
             <div class="mb-3 field-party">
@@ -122,10 +126,23 @@
     </div>
 
     <div class="mobile-actions">
-        <button type="submit" name="Entry.SaveAndAddAnother" value="false" class="btn btn-success btn-lg w-100 mb-2">Confirm and Save</button>
-        <button type="submit" name="Entry.SaveAndAddAnother" value="true" class="btn btn-outline-success btn-lg w-100">Save and Add Another</button>
+        <button type="button" id="btnPreview" class="btn btn-success btn-lg w-100 mb-2">Review and Save</button>
+        <button type="submit" name="Entry.SaveAndAddAnother" value="true" class="btn btn-outline-success btn-lg w-100" formaction="@Url.Action("Create")">Save and Add Another</button>
     </div>
 </form>
+
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Confirm Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body" id="confirmSummary"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                <button type="button" id="btnConfirmSave" class="btn btn-success">Confirm Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script src="~/js/entry-form.js" asp-append-version="true"></script>

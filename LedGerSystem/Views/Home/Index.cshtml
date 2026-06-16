@@ -1,100 +1,82 @@
 ﻿@model DashboardViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Dashboard";
+    var en = CultureInfo.GetCultureInfo("en-US");
+    var todayLabel = DateTime.Now.ToString("dddd, MMMM d, yyyy", en);
+    var suppliers = Model.PartyBalances.Where(x => x.Category == "Supplier").ToList();
+}
+
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <div class="page-date">@todayLabel</div>
+</div>
+
+@if (!Model.HasOpeningBalances)
+{
+    <div class="alert alert-warning py-2 d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <span>No opening balances entered yet.</span>
+        <a asp-controller="OpeningBalance" asp-action="Index" class="btn btn-sm btn-warning">Enter Opening Balances</a>
+    </div>
+}
+@if (!Model.HasBankAccounts)
+{
+    <div class="alert alert-info py-2 d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <span>No bank accounts configured.</span>
+        <a asp-controller="BankAccount" asp-action="Create" class="btn btn-sm btn-primary">Add Bank</a>
+    </div>
 }
 
 <div class="row g-3 mb-4">
     <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small">Cash on Hand</div>
-                <div class="h4 mb-0 text-success">@Model.CashOnHand.ToString("N2")</div>
-                <div class="small text-muted">BDT</div>
-            </div>
+        <div class="stat-card accent-green">
+            <div class="stat-label">Cash on Hand</div>
+            <div class="stat-value">@Model.CashOnHand.ToString("N2")</div>
+            <div class="stat-currency">BDT</div>
         </div>
     </div>
     <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small">Customer Receivable</div>
-                <div class="h4 mb-0">@Model.TotalCustomerReceivable.ToString("N2")</div>
-                <div class="small text-muted">BDT</div>
-            </div>
+        <div class="stat-card accent-blue">
+            <div class="stat-label">Customer Receivable</div>
+            <div class="stat-value">@Model.TotalCustomerReceivable.ToString("N2")</div>
+            <div class="stat-currency">BDT</div>
         </div>
     </div>
     <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small">Supplier Payable</div>
-                <div class="h4 mb-0 text-danger">@Model.TotalSupplierPayable.ToString("N2")</div>
-                <div class="small text-muted">BDT</div>
-            </div>
+        <div class="stat-card accent-orange">
+            <div class="stat-label">Supplier Payable</div>
+            <div class="stat-value">@Model.TotalSupplierPayable.ToString("N2")</div>
+            <div class="stat-currency">BDT</div>
         </div>
     </div>
     <div class="col-md-3 col-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="text-muted small">Quick Action</div>
-                <a asp-controller="Entry" asp-action="Create" class="btn btn-success btn-sm mt-2">New Entry</a>
-                <a asp-controller="Report" asp-action="FinalAccount" class="btn btn-outline-primary btn-sm mt-2">Final Account</a>
-            </div>
+        <div class="stat-card accent-indigo">
+            <div class="stat-label">Today Collected</div>
+            <div class="stat-value">@Model.TodayBdtCollected.ToString("N0")</div>
+            <div class="stat-currency">@Model.TodayTransactionCount entries today</div>
         </div>
     </div>
 </div>
 
-<div class="row g-3">
+<div class="row g-3 mb-4">
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white fw-semibold">Party Balances</div>
-            <ul class="list-group list-group-flush">
-                @if (!Model.TopPartyBalances.Any())
-                {
-                    <li class="list-group-item text-muted text-center py-3">No balances yet</li>
-                }
-                else
-                {
-                    foreach (var item in Model.TopPartyBalances)
-                    {
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span><strong>@item.Code</strong> <span class="text-muted small">@item.Category</span></span>
-                            <span class="@(item.Balance >= 0 ? "text-success" : "text-danger")">@item.Balance.ToString("N2")</span>
-                        </li>
-                    }
-                }
-            </ul>
-        </div>
-    </div>
-    <div style="display:none;"></div>
-    <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Recent Transactions</span>
-                <a asp-controller="Entry" asp-action="Create" class="btn btn-sm btn-outline-primary">Add</a>
-            </div>
+        <div class="app-card h-100">
+            <div class="card-header">Supplier Balances</div>
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Party</th>
-                            <th class="text-end">Amount</th>
-                        </tr>
-                    </thead>
+                <table class="table app-table mb-0">
+                    <thead><tr><th>Supplier</th><th class="text-end">Balance (BDT)</th></tr></thead>
                     <tbody>
-                        @if (!Model.RecentTransactions.Any())
+                        @if (!suppliers.Any())
                         {
-                            <tr><td colspan="4" class="text-center text-muted py-4">No transactions yet.</td></tr>
+                            <tr><td colspan="2" class="text-center text-muted py-4">No supplier balances</td></tr>
                         }
                         else
                         {
-                            foreach (var item in Model.RecentTransactions)
+                            foreach (var item in suppliers)
                             {
                                 <tr>
-                                    <td class="small">@item.TransDate.ToString("MM-dd HH:mm")</td>
-                                    <td class="small">@(item.TransType?.NameEn ?? "-")</td>
-                                    <td>@(item.Party?.Code ?? "-")</td>
-                                    <td class="text-end fw-semibold">@item.Amount.ToString("N2") @item.Currency</td>
+                                    <td><strong>@item.Code</strong> <span class="text-muted small">@item.Name</span></td>
+                                    <td class="text-end @(item.Balance >= 0 ? "balance-pos" : "balance-neg")">@item.Balance.ToString("N2")</td>
                                 </tr>
                             }
                         }
@@ -102,5 +84,90 @@
                 </table>
             </div>
         </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="app-card h-100">
+            <div class="card-header">Quick Entry</div>
+            <div class="p-3">
+                <div class="quick-entry-grid">
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="1" class="quick-entry-btn">
+                        <span class="quick-icon usdt">₮</span>
+                        <span class="quick-entry-label">Buy USDT</span>
+                    </a>
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="2" class="quick-entry-btn">
+                        <span class="quick-icon convert">⇄</span>
+                        <span class="quick-entry-label quick-entry-label-blue">USDT → RMB</span>
+                    </a>
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="3" class="quick-entry-btn">
+                        <span class="quick-icon rmb">¥</span>
+                        <span class="quick-entry-label">Sell RMB</span>
+                    </a>
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="4" class="quick-entry-btn">
+                        <span class="quick-icon collect">৳</span>
+                        <span class="quick-entry-label">Collect BDT</span>
+                    </a>
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="7" class="quick-entry-btn">
+                        <span class="quick-icon pay">↓</span>
+                        <span class="quick-entry-label">Pay Supplier</span>
+                    </a>
+                    <a asp-controller="Entry" asp-action="Create" asp-route-typeId="8" class="quick-entry-btn">
+                        <span class="quick-icon expense">$</span>
+                        <span class="quick-entry-label">Expense</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="app-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Transactions</span>
+        <div class="d-flex gap-2">
+            <a asp-controller="Transaction" asp-action="Index" class="btn btn-sm btn-outline-secondary">View All</a>
+            <a asp-controller="Entry" asp-action="Create" class="btn btn-sm btn-primary">Add</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table app-table mb-0">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Party</th>
+                    <th class="text-end">Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.RecentTransactions.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">No transactions yet.</td></tr>
+                }
+                else
+                {
+                    foreach (var item in Model.RecentTransactions)
+                    {
+                        var code = item.TransType?.Code ?? "";
+                        var typeClass = code switch
+                        {
+                            "BUY_USDT" => "tx-type-buy",
+                            "SELL_RMB" => "tx-type-sell",
+                            var c when c.StartsWith("COLLECT_") => "tx-type-collect",
+                            "PAY_BDT_SUPPLIER" => "tx-type-pay",
+                            "EXPENSE" => "tx-type-expense",
+                            _ => "tx-type-other"
+                        };
+                        <tr>
+                            <td class="small text-muted">@item.TransDate.ToString("HH:mm")</td>
+                            <td><span class="tx-type @typeClass">@(item.TransType?.NameEn ?? "-")</span></td>
+                            <td>@(item.Party?.Code ?? "-")</td>
+                            <td class="text-end fw-semibold">@item.Amount.ToString("N2") @item.Currency</td>
+                            <td><span class="badge-completed">Completed</span></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
     </div>
 </div>
