@@ -72,6 +72,16 @@
             fields.equivLabel.textContent = rule.Code === 'SELL_RMB' ? 'Expected BDT' :
                 rule.Code === 'USDT_TO_RMB' ? 'RMB Received' : 'Equivalent Amount';
         }
+        if (fields.quantityLabel) {
+            fields.quantityLabel.textContent = rule.Code === 'BUY_USDT' ? 'USDT Quantity (auto)' : 'USDT Quantity';
+        }
+
+        const qtyInput = document.getElementById('quantity');
+        if (qtyInput) {
+            const autoQty = rule.Code === 'BUY_USDT';
+            qtyInput.readOnly = autoQty;
+            qtyInput.classList.toggle('bg-light', autoQty);
+        }
 
         if (fields.partySelect && rule.PartyRole) {
             const json = partyLists[rule.PartyRole];
@@ -89,19 +99,32 @@
             }
         }
 
-        calcEquivalent();
+        syncBankVisibility();
+        calcDerivedFields();
     }
 
-    function calcEquivalent() {
-        const typeId = parseInt(typeSelect.value || '0', 10);
+    function calcDerivedFields() {
+        const rule = getRule();
         const amount = parseFloat(document.getElementById('amount')?.value || '0');
         const rate = parseFloat(document.getElementById('unitPrice')?.value || '0');
         const equiv = document.getElementById('equivalentAmount');
-        if (!equiv) return;
+        const qty = document.getElementById('quantity');
 
-        if (typeId === 3 && amount > 0 && rate > 0) {
+        if (rule?.Code === 'SELL_RMB' && equiv && amount > 0 && rate > 0) {
             equiv.value = (amount * rate).toFixed(4);
         }
+
+        if (rule?.Code === 'BUY_USDT' && qty && amount > 0 && rate > 0) {
+            qty.value = (amount / rate).toFixed(4);
+        }
+    }
+
+    function syncBankVisibility() {
+        const rule = getRule();
+        const payMethod = document.querySelector('[name="Entry.PayMethod"]');
+        const payMethodValue = payMethod?.value || '';
+        const showBank = !!rule?.ShowBank || (rule?.ShowPayMethod && payMethodValue === '2');
+        toggle(fields.bank, showBank);
     }
 
     function buildSummary() {
@@ -145,8 +168,9 @@
     }
 
     typeSelect.addEventListener('change', applyRule);
-    document.getElementById('amount')?.addEventListener('input', calcEquivalent);
-    document.getElementById('unitPrice')?.addEventListener('input', calcEquivalent);
+    document.getElementById('amount')?.addEventListener('input', calcDerivedFields);
+    document.getElementById('unitPrice')?.addEventListener('input', calcDerivedFields);
+    document.querySelector('[name="Entry.PayMethod"]')?.addEventListener('change', syncBankVisibility);
 
     applyRule();
 })();

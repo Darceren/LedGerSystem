@@ -54,11 +54,6 @@
                 </select>
             </div>
 
-            <div class="mb-3 field-quantity d-none">
-                <label asp-for="Entry.Quantity" class="form-label" id="quantityLabel">USDT Quantity</label>
-                <input asp-for="Entry.Quantity" class="form-control form-control-lg" inputmode="decimal" />
-            </div>
-
             <div class="mb-3">
                 <label asp-for="Entry.Amount" class="form-label fw-semibold" id="amountLabel">Amount</label>
                 <div class="input-group input-group-lg">
@@ -74,6 +69,11 @@
             <div class="mb-3 field-rate">
                 <label asp-for="Entry.UnitPrice" class="form-label" id="rateLabel">Rate / Unit Price</label>
                 <input asp-for="Entry.UnitPrice" class="form-control form-control-lg" inputmode="decimal" id="unitPrice" />
+            </div>
+
+            <div class="mb-3 field-quantity d-none">
+                <label asp-for="Entry.Quantity" class="form-label" id="quantityLabel">USDT Quantity</label>
+                <input asp-for="Entry.Quantity" class="form-control form-control-lg" inputmode="decimal" id="quantity" />
             </div>
 
             <div class="mb-3 field-equiv d-none">

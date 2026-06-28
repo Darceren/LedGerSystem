@@ -269,6 +269,7 @@ public class TransactionService(ISqlSugarClient db) : ITransactionService
 
         return type.Code switch
         {
+            "BUY_USDT" when !model.UnitPrice.HasValue || model.UnitPrice <= 0 => "Please enter cost (BDT/USDT).",
             "BUY_USDT" when !model.Quantity.HasValue || model.Quantity <= 0 => "Please enter USDT quantity.",
             "BUY_USDT" when !model.PayMethod.HasValue => "Please select pay method (Cash/Bank).",
             "BUY_USDT" when model.PayMethod == 2 && !model.BankAccountId.HasValue => "Please select bank account for payment.",
@@ -312,6 +313,12 @@ public class TransactionService(ISqlSugarClient db) : ITransactionService
             case "BUY_USDT":
                 model.Currency = AppConstants.CurrencyBdt;
                 model.QuantityCurrency = AppConstants.CurrencyUsdt;
+                if ((!model.Quantity.HasValue || model.Quantity <= 0)
+                    && model.UnitPrice is > 0
+                    && model.Amount > 0)
+                {
+                    model.Quantity = Math.Round(model.Amount / model.UnitPrice.Value, 4);
+                }
                 break;
             case "USDT_TO_RMB":
                 model.QuantityCurrency = AppConstants.CurrencyUsdt;
